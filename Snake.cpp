@@ -39,8 +39,10 @@ void set_cursor(int x = 0, int y = 0)
 }
 
 class Apple;
+class Game;
 
 class Snake {
+	friend Game;
 	friend void printMap(Snake& snake, Apple& apple);
 	struct Body {
 		int x;
@@ -110,23 +112,17 @@ public:
 		}
 		return nums;
 	}
+
+	int GetSize() { return Size; }
 };
 
 class Apple {
+	friend Game;
 	friend Snake;
 	friend void printMap(Snake& snake, Apple& apple);
 	int x, y;
 	int *defaults = new int[2]{5, 5};
 	int getRandomNumber(int min, int max, const int* exclusions) {
-		/*std::srand(std::time(0));
-		int randomNum = rand() % (max - min + 1) + min;
-		for (int i = 1; i < exclusions[0] + 1; i++) {
-			if (randomNum == exclusions[i]) {
-				randomNum = rand() % (max - min + 1) + min;
-				i = 1;
-			}
-		}
-		return randomNum;*/
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<> dis(min, max);
@@ -163,15 +159,27 @@ void Snake::move(Apple& apple) {
 	int tempX = current->x, tempY = current->y;
 	if (dir == Directions::DOWN) {
 		current->y++;
+		if (current->y == 9) {
+			current->y = 1;
+		}
 	}
 	else if (dir == Directions::UP) {
 		current->y--;
+		if (current->y == 0) {
+			current->y = 8;
+		}
 	}
 	else if (dir == Directions::RIGHT) {
 		current->x++;
+		if (current->x == 18) {
+			current->x = 1;
+		}
 	}
 	else if (dir == Directions::LEFT) {
 		current->x--;
+		if (current->x == 0) {
+			current->x = 17;
+		}
 	}
 	current = current->next;
 	while (current != nullptr) {
@@ -197,6 +205,7 @@ void printMap(Snake &snake, Apple &apple) {
 		map[snakeBody->y][snakeBody->x] = '0';
 		snakeBody = snakeBody->next;
 	}
+	std::cout << "Size: " << snake.GetSize() << std::endl;
 	for (auto& el : map) {
 		std::cout << el;
 	}
@@ -208,29 +217,130 @@ void printMap(Snake &snake, Apple &apple) {
 	map[apple.y][apple.x] = ' ';
 }
 
-int main() {
-	Snake snake;
-	Apple apple;
-	int time = clock();
-	printMap(snake, apple);
-	while (true) {
-		if (GetKeyState('W') & 0x8000) {
-			dir = Directions::UP;
-		}
-		if (GetKeyState('A') & 0x8000) {
-			dir = Directions::LEFT;
-		}
-		if (GetKeyState('S') & 0x8000) {
-			dir = Directions::DOWN;
-		}
-		if (GetKeyState('D') & 0x8000) {
-			dir = Directions::RIGHT;
-		}
-		if ((clock() - time) / (CLOCKS_PER_SEC/2) >= 0.5) {
-			time = clock();
-			snake.move(apple);
-			printMap(snake, apple);
+class Game {
+	double speed = CLOCKS_PER_SEC;
+
+	void Start() {
+		Snake snake;
+		Apple apple;
+		int time = clock();
+		printMap(snake, apple);
+		while (true) {
+			if (GetAsyncKeyState('W') & 0x8000) {
+				dir = Directions::UP;
+			}
+			if (GetAsyncKeyState('A') & 0x8000) {
+				dir = Directions::LEFT;
+			}
+			if (GetAsyncKeyState('S') & 0x8000) {
+				dir = Directions::DOWN;
+			}
+			if (GetAsyncKeyState('D') & 0x8000) {
+				dir = Directions::RIGHT;
+			}
+			if ((clock() - time) / (speed) >= 1) {
+				time = clock();
+				snake.move(apple);
+				printMap(snake, apple);
+			}
 		}
 	}
+
+	enum MainButtons {
+		START = 1,
+		OPTIONS,
+		EXIT,
+	};
+	enum OptionsButtons {
+		SPEED = 1,
+		BACKOPT,
+	};
+	enum SpeedButtons {
+		FAST = 1,
+		MIDDLE,
+		SLOW,
+		BACKSPD,
+	};
+	
+	int Main() {
+		int choice;
+		std::cout << "1. Start\n" << "2. Options\n" << "3. Exit\n" << "Enter: ";
+		std::cin >> choice;
+		return choice;
+	}
+	int Options() {
+		int choice;
+		std::cout << "1. Set the speed\n" << "2. Back\n" << "Enter: ";
+		std::cin >> choice;
+		return choice;
+	}
+	int Speed() {
+		system("cls");
+		bool isRunning = true;
+		int choice = SpeedButtons::BACKSPD;
+		while (isRunning)
+		{
+			if (speed == CLOCKS_PER_SEC / 2) {
+				std::cout << "Now speed is fast\n";
+			}
+			else if (speed == CLOCKS_PER_SEC) {
+				std::cout << "Now speed is middle\n";
+			}
+			else  if (speed == CLOCKS_PER_SEC * 1.5) {
+				std::cout << "Now speed is slow\n";
+			}
+			std::cout << "1. Fast\n" << "2. Middle\n" << "3. Slow\n" << "4. Back\n" << "Enter: ";
+			std::cin >> choice;
+			switch (choice) {
+			case SpeedButtons::FAST:
+				speed = CLOCKS_PER_SEC / 2;
+				system("cls");
+				continue;
+			case SpeedButtons::MIDDLE:
+				speed = CLOCKS_PER_SEC;
+				system("cls");
+				continue;
+			case SpeedButtons::SLOW:
+				speed = CLOCKS_PER_SEC * 1.5;
+				system("cls");
+				continue;
+			case SpeedButtons::BACKSPD:
+				isRunning = false;
+				break;
+			}
+		}
+		return choice;
+	}
+public:
+	void Run() {
+		bool isRunning = true;
+		while (isRunning) {
+			int choice = Main();
+			switch (choice) {
+			case MainButtons::START:
+				Start();
+			case MainButtons::EXIT:
+				return;
+			case MainButtons::OPTIONS:
+				system("cls");
+				choice = Options();
+				switch (choice) {
+				case OptionsButtons::SPEED:
+					Speed();
+					system("cls");
+					continue;
+				case OptionsButtons::BACKOPT:
+					system("cls");
+					continue;
+				}
+			}
+		}
+	}
+
+};
+
+int main() {
+	Game game;
+	game.Run();
 	return 0;
 }
