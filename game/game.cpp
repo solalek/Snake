@@ -6,6 +6,21 @@
 #include "snake/snake.h"
 #include "apple/apple.h"
 
+const int mapX = 21, mapY = 10;
+
+char map[mapY][mapX] = {
+	"-------------------\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"|                 |\n",
+	"-------------------\n",
+};
+
 void printMap(Snake &snake, Apple &apple);
 
 

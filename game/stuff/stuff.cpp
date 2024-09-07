@@ -4,30 +4,13 @@
 #include <termios.h>
 #include <ctime>
 #include <stdio.h>
+#include "stuff.h"
+#include <sys/select.h>
 
 
 
-const int mapX = 21, mapY = 10;
+int dir = Directions::DOWN;
 
-char map[mapY][mapX] = {
-	"-------------------\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"-------------------\n",
-};
-
-enum Directions {
-	UP,
-	DOWN,
-	RIGHT,
-	LEFT,
-};
 
 void set_cursor(int x = 0, int y = 0)
 {

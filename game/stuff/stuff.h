@@ -1,20 +1,7 @@
 #ifndef STUFF_H
 #define STUFF_H
 
-const int mapX = 21, mapY = 10;
-
-char map[mapY][mapX] = {
-	"-------------------\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"|                 |\n",
-	"-------------------\n",
-};
+extern int dir;
 
 enum Directions {
 	UP,
@@ -23,9 +10,8 @@ enum Directions {
 	LEFT,
 };
 
-int dir = Directions::DOWN;
 
-void set_cursor(int x = 0, int y = 0);
+void set_cursor(int x, int y);
 
 // Disable canonical mode and echo for the terminal
 void enableRawMode(struct termios& orig_termios);
